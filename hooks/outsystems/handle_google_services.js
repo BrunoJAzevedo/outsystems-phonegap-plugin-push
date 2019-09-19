@@ -105,6 +105,7 @@ function copyGoogleServiceOnAndroid(sourceDir, targetDir) {
         console.log("DEBUG Android fs.copyFileSync");
         return true;
     } catch (error) {
+        console.log("DEBUG ERROR", error);
         console.log("DEBUG copyGoogleServiceOnAndroid ERROR");
         return false;
     }
