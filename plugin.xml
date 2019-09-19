@@ -109,8 +109,6 @@
     Depends on the resource to be uploaded to "google-services" folder inside Service Studio.
     copyGoogleServiceConfig hook is in charge to copy from the source directory to the root of the plugin folder.
     -->
-    <resource-file src="GoogleService-Info.plist" target="./GoogleService-Info.plist" />  
-
   </platform>
   <platform name="windows">
     <hook type="after_plugin_install" src="hooks/windows/setToastCapable.js"/>
