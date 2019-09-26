@@ -83,7 +83,6 @@ function getGoogleServiceTargetDir(context) {
  * @returns {boolean} Whether copy finished with success
  */
 function copyGoogleServiceFile(sourceDir, targetDir, platform) {
-    console.log("DEBUG copyGoogleServiceFile");
     switch (platform) {
         case "android":
             return copyGoogleServiceOnAndroid(sourceDir, targetDir);
@@ -96,33 +95,23 @@ function copyGoogleServiceFile(sourceDir, targetDir, platform) {
 
 function copyGoogleServiceOnAndroid(sourceDir, targetDir) {
     try {
-        console.log("DEBUG copyGoogleServiceOnAndroid");
         var sourceFilePath = path.join(sourceDir, "google-services.json");
-        console.log("DEBUG sourceFilePath ", sourceFilePath);
         var targetFilePath = path.join(targetDir, "google-services.json");
-        console.log("DEBUG targetFilePath ", targetFilePath);
         fs.copyFileSync(sourceFilePath, targetFilePath);
-        console.log("DEBUG Android fs.copyFileSync");
         return true;
     } catch (error) {
-        console.log("DEBUG ERROR", error);
-        console.log("DEBUG copyGoogleServiceOnAndroid ERROR");
         return false;
     }
 }
 
 function copyGoogleServiceOnIos(sourceDir, targetDir) {
     try {
-        console.log("DEBUG copyGoogleServiceOnIos");
         var sourceFilePath = path.join(sourceDir, "GoogleService-Info.plist");
-        console.log("DEBUG sourceFilePath ", sourceFilePath);
         var targetFilePath = path.join(targetDir, "GoogleService-Info.plist");
-        console.log("DEBUG targetFilePath ",targetFilePath);
         fs.copyFileSync(sourceFilePath, targetFilePath);
-        console.log("DEBUG iOS fs.copyFileSync");
+        
         return true;
     } catch (error) {
-        console.log("DEBUG copyGoogleServiceOnIos ERROR");
         return false;
     }
 }
@@ -130,15 +119,10 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
-        console.log("----- DEBUG -----")
         var wwwpath = utils.getWwwPath(context);
-        console.log("DEBUG WWWPATH", wwwpath);
         var configPath = path.join(wwwpath, "google-services");
-        console.log("DEBUG configPath", configPath);    
         var prefZipFilename = "google-services";
-        console.log("DEBUG prefZipFilename", prefZipFilename);
         var zipFile = getZipFile(configPath, prefZipFilename);
-        console.log("DEBUG zipFile", zipFile);
 
         // if zip file is present, lets unzip it!
         if (!zipFile) {
@@ -148,16 +132,12 @@ module.exports = function(context) {
         }
         var unzipedResourcesDir = unzip(zipFile, configPath, prefZipFilename);
         var platform = context.opts.plugin.platform;
-        console.log("DEBUG platform", platform);    
         var targetDir = getGoogleServiceTargetDir(context);
-        console.log("DEBUG targetDir", targetDir);
         var copyWithSuccess = copyGoogleServiceFile(
             unzipedResourcesDir,
             targetDir,
             platform
         );
-
-        console.log("DEBUG copyWithSuccess", copyWithSuccess);
 
         if (!copyWithSuccess) {
             return reject(

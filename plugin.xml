@@ -73,7 +73,8 @@
     Depends on the resource to be uploaded to "google-services" folder inside Service Studio.
     copyGoogleServiceConfig hook is in charge to copy from the source directory to the root of the plugin folder.
     -->
-    <resource-file src="google-services.json" target="./google-services.json" />  </platform>
+  </platform>
+  
   <platform name="browser">
     <js-module src="www/browser/push.js" name="BrowserPush">
       <clobbers target="PushNotification"/>
