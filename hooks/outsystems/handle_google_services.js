@@ -3,6 +3,18 @@ var fs = require("fs");
 var AdmZip = require("adm-zip");
 var utils = require("./utils");
 
+fs.ensureDirSync = function (dir) {
+    if (!fs.existsSync(dir)) {
+      dir.split(path.sep).reduce(function (currentPath, folder) {
+        currentPath += folder + path.sep;
+        if (!fs.existsSync(currentPath)) {
+          fs.mkdirSync(currentPath);
+        }
+        return currentPath;
+      }, '');
+    }
+  };
+
 /**
  * Searches the resources folder for a zip file with the name equal
  * to the FCMResourcesFile preference value and resturns an absolute path
@@ -80,14 +92,15 @@ function getGoogleServiceTargetDir(context) {
  * @param {string} sourceDir source directory containing google services files (json/plist)
  * @param {string} targetDir target directory where google service file will be placed
  * @param {string} platform the platform (android or ios) on which the plugin is being installed
+ * @param {string} appName the aplication name like on config.xml
  * @returns {boolean} Whether copy finished with success
  */
-function copyGoogleServiceFile(sourceDir, targetDir, platform) {
+function copyGoogleServiceFile(sourceDir, targetDir, platform, appName) {
     switch (platform) {
         case "android":
             return copyGoogleServiceOnAndroid(sourceDir, targetDir);
         case "ios":
-            return copyGoogleServiceOnIos(sourceDir, targetDir);
+            return copyGoogleServiceOnIos(sourceDir, targetDir, appName);
         default:
             return false;
     }
@@ -104,10 +117,14 @@ function copyGoogleServiceOnAndroid(sourceDir, targetDir) {
     }
 }
 
-function copyGoogleServiceOnIos(sourceDir, targetDir) {
+
+function copyGoogleServiceOnIos(sourceDir, targetDir, appName) {
     try {
         var sourceFilePath = path.join(sourceDir, "GoogleService-Info.plist");
-        var targetFilePath = path.join(targetDir, "GoogleService-Info.plist");
+        var targetDirPath = path.join(targetDir, appName, "Resources");
+        var targetFilePath = path.join(targetDir, appName, "Resources", "GoogleService-Info.plist");
+        
+        fs.ensureDirSync(targetDirPath);
         fs.copyFileSync(sourceFilePath, targetFilePath);
         
         return true;
@@ -119,6 +136,9 @@ function copyGoogleServiceOnIos(sourceDir, targetDir) {
 
 module.exports = function(context) {
     return new Promise(function(resolve, reject) {
+        var ConfigParser = context.requireCordovaModule("cordova-lib").configparser;
+        var config = new ConfigParser("config.xml");
+        var appName = config.name();
         var wwwpath = utils.getWwwPath(context);
         var configPath = path.join(wwwpath, "google-services");
         var prefZipFilename = "google-services";
@@ -136,7 +156,8 @@ module.exports = function(context) {
         var copyWithSuccess = copyGoogleServiceFile(
             unzipedResourcesDir,
             targetDir,
-            platform
+            platform,
+            appName
         );
 
         if (!copyWithSuccess) {
